@@ -9,3 +9,18 @@ CREATE TABLE `tblAuthSessions` (
   `txtIDToken` text DEFAULT NULL,
   PRIMARY KEY (`intAuthID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
+CREATE TABLE `tblDomains` (
+  `intDomainID` int(11) NOT NULL AUTO_INCREMENT,
+  `txtDomain` varchar(255) DEFAULT NULL,
+  `txtOwner` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`intDomainID`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
+CREATE TABLE `tblUrls` (
+  `intLinkID` int(11) NOT NULL AUTO_INCREMENT,
+  `txtUrl` smalltext DEFAULT NULL,
+  `txtSlug` varchar(255) DEFAULT NULL,
+  `intHits` int(11) DEFAULT 0,
+  `dtCreated` timestamp DEFAULT current_timestamp(),
+  `txtCreator` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`intLinkID`)
+  ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
