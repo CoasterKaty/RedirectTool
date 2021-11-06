@@ -6,6 +6,9 @@
  * https://github.com/CoasterKaty
  * https://katytech.blog/
  * https://twitter.com/coaster_katy
+ 
+ ***RENAME TO config.inc ****
+ 
  *
  */
 
