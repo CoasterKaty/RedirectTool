@@ -7,6 +7,7 @@ html {
 	--InputBlue: #243a5e;
 	--TableHighlight: #e2e2e2;
 	--FormPlaceholder: #656567;
+	--Required: #ff0000;
 }
 
 * {
@@ -84,7 +85,15 @@ form label {
 	padding-top: 7px;
 	padding-bottom: 2px;
 }
-input {
+form span.required {
+	color: var(--Required);
+	margin-right: 3px;
+	font-weight: bold;
+}
+textarea {
+	resize: vertical;
+}
+textarea, input {
 	outline: none;
 	border: 1px solid #bdc1c1;
 	box-sizing: border-box;
@@ -92,10 +101,10 @@ input {
 input.mandatory {
 	border: 1px solid #ff0000;
 }
-input:focus {
+input:focus, textarea:focus {
 	border: 1px solid var(--InputBlue);
 }
-input[type="text"] {
+input[type="text"], textarea {
 	width: calc(100% - 15px);
 	padding-top: 2px;
 }
@@ -211,10 +220,10 @@ div.dropdown li:hover {
 #navMain > div.title:hover {
 	background-color: var(--BackgroundBlack);
 }
-#navMain > div:hover, #navMain > div:focus-within {
+#navMain > div:hover, #navMain > div:focus-within, #navMain > div.selected {
 	background-color: #333333;
 }
-#navSub > div:hover, #navSub > div:focus-within {
+#navSub > div:hover, #navSub > div:focus-within, #navSub > div.selected {
 	background-color: #36577c;
 }
 .nav > div:focus-within >  ul {
@@ -273,6 +282,10 @@ div.dropdown li:hover {
 
 #navSub > div > span {
 	vertical-align: sub;
+}
+#navSub > div > span > a {
+	text-decoration: inherit;
+	color: inherit;
 }
 
 #navMain * ul {

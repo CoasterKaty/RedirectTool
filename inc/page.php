@@ -63,33 +63,25 @@ class sitePage {
 	}
 
 	function printNavigation() {
-		$h1Bar = '<div id="navMain" class="nav"><div ' . ($this->logo ? ' style="background-image: url(\'' . $this->logo . '\'); padding-left: 50px; margin-left: 3px;"' : '') . ' class="title"><span>' . $this->title . '</span></div>';
-		$h1Bar .= $this->printLoginItem();
-		$h2Bar = '<div id="navSub" class="nav">';
+		$nav['main'] = '<div id="navMain" class="nav"><div ' . ($this->logo ? ' style="background-image: url(\'' . $this->logo . '\'); padding-left: 50px; margin-left: 3px;"' : '') . ' class="title"><span>' . $this->title . '</span></div>';
+		$nav['main'] .= $this->printLoginItem();
+		$nav['sub'] = '<div id="navSub" class="nav">';
 		foreach ($this->mainNavigation as $navItem) {
-			if ($navItem->type == 'main') {
-				$h1Bar .= '<div tabindex="-1" id="' . $navItem->id . '" style="float: ' . $navItem->position . '"' . ($navItem->flyoutAction ? ' onclick="JavaScript:openFlyout(\'' . $navItem->flyoutAction . '\', \'' . $navItem->flyoutTitle . '\');"' : '') . '><span>' . $navItem->name . '</span>';
+				$nav[$navItem->type] .= '<div ' . ($navItem->selected ? 'class="selected"' : '') . 'tabindex="-1" id="' . $navItem->id . '" style="float: ' . $navItem->position . '"' . ($navItem->flyoutAction ? ' onclick="JavaScript:openFlyout(\'' . $navItem->flyoutAction . '\', \'' . $navItem->flyoutTitle . '\');"' : '') . '><span>' . ($navItem->link ? '<a href="' . $navItem->link . '">' . $navItem->name . '</a>' : $navItem->name) . '</span>';
 				if ($navItem->subMenu) {
-					$h1Bar .= $this->printNavigationItem($navItem);
+					$nav[$navItem->type] .= $this->printNavigationItem($navItem);
 				}
-				$h1Bar .= '</div>';
-			} else {
-				$h2Bar .= '<div tabindex="-1" id="' . $navItem->id . '" style="float: ' . $navItem->position . '"' . ($navItem->flyoutAction ? ' onclick="JavaScript:openFlyout(\'' . $navItem->flyoutAction . '\', \'' . $navItem->flyoutTitle . '\');"' : '') . '><span>' . $navItem->name . '</span>';
-				if ($navItem->subMenu) {
-					$h2Bar .= $this->printNavigationItem($navItem);
-				}
-				$h2Bar .= '</div>';
-			}
+				$nav[$navItem->type] .= '</div>';
 		}
-		$h1Bar .= '</div>';
-		$h2Bar .= '</div>';
-		return $h1Bar . $h2Bar;
+		$nav['main'] .= '</div>';
+		$nav['sub'] .= '</div>';
+		return $nav['main'] . "\r\n" . $nav['sub'];
 	}
 
 	function printNavigationItem($navItem, $level = 1) {
 		$output .= '<ul class="' . ($level == 1 ? 'odd' : 'even') . '">';
 		foreach ($navItem->subMenu as $subItem) {
-			$output .= '<li ' . ($subItem->subMenu ? ' tabindex="-2" class="hasSubMenu"' : '') . ' id="' . $subItem->id . '"' . ($subItem->flyoutAction ? ' onclick="JavaScript:openFlyout(\'' . $subItem->flyoutAction . '\', \'' . $subItem->flyoutTitle . '\');"' : '')  . '>' . $subItem->name;
+			$output .= '<li ' . ($subItem->subMenu ? ' tabindex="-2" class="hasSubMenu"' : '') . ' id="' . $subItem->id . '"' . ($subItem->flyoutAction ? ' onclick="JavaScript:openFlyout(\'' . $subItem->flyoutAction . '\', \'' . $subItem->flyoutTitle . '\');"' : '')  . '>' . ($subItem->link ? '<a href="' . $subItem->link . '">' . $subItem->name . '</a>' : $subItem->name);
 			if ($subItem->subMenu) {
 				$output .= $this->printNavigationItem($subItem, ($level == 1 ? 2 : 1));
 			}
@@ -172,6 +164,8 @@ class navigationItem {
 	public $type = 'main';		//main, sub
 	public $flyoutAction = '';	//URL to open in flyout on click
 	public $flyoutTitle = '';	//Title to show in flyout
+	public $link = '';		//URL to open on click, in main window
+	public $selected = 0;		//0: not selected, 1: item is selected. Applies to top level menu item only
 
 	function __construct($name, $type='main', $position='left') {
 		$this->name = $name;
@@ -215,7 +209,7 @@ class pageTable {
 	function output() {
 		$output = '<div class="table"><div class="head"><div class="row">';
 		foreach ($this->columns as $column) {
-			$output .= '<div class="cell" ' . ($column->width ? ' style="max-width: ' . $column->width . 'px;"' : '') . '>' . $column->text . '</div>';
+			$output .= '<div class="cell" ' . ($column->width ? ' style="width: ' . $column->width . 'px; max-width: ' . $column->width . 'px;"' : '') . '>' . $column->text . '</div>';
 		}
 		$output .= '</div></div><div class="body">';
 		foreach ($this->rows as $row) {
@@ -293,6 +287,7 @@ class pageFormField {
 	public $options;
 	public $multiselect;	//list only, 1 = yes
 	public $required;
+	public $height;		//bigtext only
 
 	function __construct($name, $type) {
 		$this->name = $name;
@@ -302,10 +297,17 @@ class pageFormField {
 
 	function output() {
 		$output = '';
+		$required = ($this->required ? '<span class="required" title="This field is required">*</span>' : '');
 		// for dropdown and list, $this->required needs some JS maybe, as just putting "required" in the input means all of them have to be checked/selected.
 		switch ($this->type) {
 			case 'text':
-				$output .= ($this->label ? '<label for="' . $this->id . '">' . $this->label . '</label>' : '') . '<input ' . ($this->required ? 'required ' : '') . 'id="' . $this->id . '" type="text" name="' . $this->name . '" value="' . $this->value . '" placeholder="' . $this->placeholder . '" onchange="JavaScript:setUnsaved();"/>';
+				$output .= ($this->label ? '<label for="' . $this->id . '">' . $required . $this->label . '</label>' : '') . '<input ' . ($this->required ? 'required ' : '') . 'id="' . $this->id . '" type="text" name="' . $this->name . '" value="' . $this->value . '" placeholder="' . $this->placeholder . '" onchange="JavaScript:setUnsaved();"/>';
+				break;
+			case 'bigtext':
+				$output .= ($this->label ? '<label for="' . $this->id . '">' . $required . $this->label . '</label>' : '') . '<textarea style="height: ' . ($this->height ? $this->height : '90') . 'px;" ' . ($this->required ? 'required ' : '') . 'id="' . $this->id . '" type="text" name="' . $this->name . '"  placeholder="' . $this->placeholder . '" onchange="JavaScript:setUnsaved();"/>' . $this->value . '</textarea>';
+				break;
+			case 'date':
+				$output .= ($this->label ? '<label for="' . $this->id . '">' . $required . $this->label . '</label>' : '') . '<input ' . ($this->required ? 'required ' : '') . 'id="' . $this->id . '" type="date" name="' . $this->name . '" value="' . $this->value . '" onchange="JavaScript:setUnsaved();"/>';
 				break;
 			case 'button':
 				$output .= '<input type="button" name="' . $this->name . '" value="' . $this->value . '" />';
@@ -318,7 +320,7 @@ class pageFormField {
 				if (!$this->label) $this->label = 'List';
 				$outputTable = new pageTable();
 				$headerRow = $outputTable->addColumn(new pageTableColumn($this->label));
-				$headerRow->text = $this->label;
+				$headerRow->text = $required . $this->label;
 				foreach ($this->options as $listValue => $listText) {
 					$tableRow = $outputTable->addRow();
 					$thisRowID = 'r' . uniqid();
@@ -333,7 +335,7 @@ class pageFormField {
 				break;
 			case 'dropdown':
 				if (!$this->label) $this->label = 'Dropdown';
-				$output .= ($this->label ? '<label for="' . $this->id . '">' . $this->label . '</label>' : '') . '<div class="dropdown" tabindex="-2"><span id="' . $this->id . '" class="placeholder">' . $this->placeholder . '</span><ul>';
+				$output .= '<label for="' . $this->id . '">' . $required . $this->label . '</label>' . '<div class="dropdown" tabindex="-2"><span id="' . $this->id . '" class="placeholder">' . $this->placeholder . '</span><ul>';
 				foreach ($this->options as $listValue => $listText) {
 					$thisRowID = 'r' . uniqid();
 					$thisLabelID = 'l' . uniqid();
