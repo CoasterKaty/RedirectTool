@@ -1,9 +1,9 @@
-# SiteTemplate
+# RedirectTool
 
 Katy Nicholson
 
 https://katystech.blog/
 
-PHP project - template site for creating admin portals etc
+PHP project for creating/managing short link URLs
 
 Note: Requires the PHP curl extensions
