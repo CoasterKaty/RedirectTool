@@ -1,0 +1,389 @@
+html {
+	--BorderGrey: #e6e6e6;
+	--BackgroundWhite: #ffffff;
+	--TextWhite: #ffffff;
+	--BackgroundBlack: #000000;
+	--BackgroundBlue: #243a5e;
+	--InputBlue: #243a5e;
+	--TableHighlight: #e2e2e2;
+	--FormPlaceholder: #656567;
+}
+
+* {
+	font-family: "Segoe UI", Calibri, sans-serif;
+}
+html, body {
+	margin: 0px;
+	padding: 0px;
+	font-size: 13px;
+
+}
+
+/* Flyout */
+
+div#flyout {
+	display: none;
+	position: absolute;
+	z-index: 200;
+	right: 0px;
+	height: 100vh;
+	width: 500px;
+	border-left: 1px solid var(--BorderGrey);
+	overflow: hidden;
+	top: 0px;
+	background-color: var(--BackgroundWhite);
+	box-shadow: 0 6.4px 14.4px 0 rgba(0,0,0,.132),0 1.2px 3.6px 0 rgba(0,0,0,.108);
+}
+div#flyout > iframe {
+	position: absolute;
+	width: calc(100% - 10px);
+	height: calc(100% - 40px);
+	top: 40px;
+	left: 10px;
+	border: none;
+}
+div#flyout div#flyoutClose {
+	position: absolute;
+	right: 6px;
+	top: 6px;
+	background-image: url('/images/FlyoutCloseButton.png');
+	background-repeat: no-repeat;
+	width: 20px;
+	height: 20px;
+	cursor: pointer;
+	padding: 4px;
+	background-position: center;
+}
+div#flyout div#flyoutTitle {
+	color: #385b94;
+	font-size: 24px;
+	font-weight: bold;
+	padding: 0px 8px;
+}
+div#flyout div#flyoutClose:hover {
+	background-color: var(--BorderGrey);
+}
+
+
+/* Forms */
+
+form div.table {
+	width: calc(100% - 17px);
+	padding-top: 7px;
+}
+form div.table div.row * {
+	cursor: pointer;
+}
+
+form div.table div.head div.row * {
+	cursor: initial;
+}
+form label {
+	width: 100%;
+	display: block;
+	padding-top: 7px;
+	padding-bottom: 2px;
+}
+input {
+	outline: none;
+	border: 1px solid #bdc1c1;
+	box-sizing: border-box;
+}
+input.mandatory {
+	border: 1px solid #ff0000;
+}
+input:focus {
+	border: 1px solid var(--InputBlue);
+}
+input[type="text"] {
+	width: calc(100% - 15px);
+	padding-top: 2px;
+}
+input[type="button"], input[type="submit"] {
+	background-color: var(--InputBlue);
+	color: var(--TextWhite);
+	padding: 5px 20px;
+	margin-top: 10px;
+	cursor: pointer;
+}
+
+.hidden {
+	display: none;
+}
+label.list {
+	padding: 5px;
+	margin: -5px;
+}
+input:checked + label.list {
+	background-color: var(--TableHighlight);
+}
+
+
+div.dropdown {
+	outline: none;
+	width: calc(100% - 17px);
+	border: 1px solid #bdc1c1;
+	position: relative;
+	height: 20px;
+	cursor: pointer;
+	background-image: url('/images/dropdownExpand.png?1');
+	background-repeat: no-repeat;
+	background-position-x: right;
+}
+div.dropdown:focus-within {
+	background-image: url('/images/dropdownCollapse.png?1');
+	border: 1px solid #385b94;
+
+}
+
+div.dropdown > span {
+	padding-left: 2px;
+}
+div.dropdown > span.placeholder {
+	color: var(--FormPlaceholder);
+}
+
+div.dropdown:focus-within ul {
+	display: block;
+}
+div.dropdown ul {
+	display: none;
+	z-index: 300;
+	position: absolute;
+	background-color: var(--BackgroundWhite);
+	box-shadow: 0 6.4px 14.4px 0 rgba(0,0,0,.132),0 1.2px 3.6px 0 rgba(0,0,0,.108);
+	border: 1px solid var(--BorderGrey);
+	list-style-type: none;
+	margin: -1px;
+	top: 21px;
+	padding-left: 0px;
+	width: 100%;
+}
+div.dropdown * {
+	cursor: pointer;
+}
+div.dropdown li {
+	display: block;
+	padding: 2px;
+}
+div.dropdown li:hover {
+	background-color: var(--TableHighlight);
+}
+
+/* Navigation Menus */
+#navMain {
+	background-color: var(--BackgroundBlack);
+	color: var(--TextWhite);
+	margin: 0px;
+	padding: 0px;
+	font-size: 28px;
+}
+
+#navMain > div {
+	height: 44px;
+	cursor: pointer;
+}
+#navSub > div {
+	height: 36px;
+	cursor: pointer;
+}
+
+.nav * {
+	outline: none;
+}
+.nav > div {
+	display: inline-block;
+	position: relative;
+	padding: 0px 10px;
+	margin: 0px;
+}
+#navMain > div.title {
+	background-repeat: no-repeat;
+	background-size: auto calc(100% - 6px);
+	background-position: 3px 3px;
+	max-height: 44px;
+	cursor: initial;	
+}
+#navMain > div {
+	padding-top: 3px;
+	padding-bottom: 3px;
+}
+#navMain > div.title:hover {
+	background-color: var(--BackgroundBlack);
+}
+#navMain > div:hover, #navMain > div:focus-within {
+	background-color: #333333;
+}
+#navSub > div:hover, #navSub > div:focus-within {
+	background-color: #36577c;
+}
+.nav > div:focus-within >  ul {
+	display: block;
+}
+.nav * ul > li.hasSubMenu {
+	background-image: url('/images/SubMenuIcon.png');
+	background-repeat: no-repeat;
+	background-position: right;
+}
+.nav > div:focus-within > ul li:focus-within > ul {
+	display: block;
+}
+
+
+.nav > div > ul  {
+	position: absolute;
+	left: 0px;
+}
+.nav ul {
+	display: none;
+	font-size: 14px;
+	padding: 0px;
+	width: fit-content;
+	z-index: 100;
+	list-style-type: none;
+	margin: 0px;
+	font-weight: 100;
+	background-color: #525252;
+	cursor: initial;
+
+}
+.nav li.hasSubMenu {
+	position: relative;
+	cursor: pointer;
+}
+.nav li.hasSubMenu > ul {
+	position: absolute;
+	top: 0px;
+	left: 100%;
+}
+.nav > img.logo {
+	max-height: 44px;
+}
+.nav * ul.odd {
+	background-color: #525252;
+}
+.nav * ul.even {
+	background-color: #727272;
+}
+.nav * ul > li > ul {
+	left: 150px;
+	top: 0px;
+}
+
+
+#navSub > div > span {
+	vertical-align: sub;
+}
+
+#navMain * ul {
+	top: 100%;
+}
+#navSub > div > ul {
+	top: 100% !important;
+}
+#navSub * ul {
+	top: 0px;
+}
+.nav * ul > li {
+	padding: 5px;
+	margin: 0px;
+	min-width: 150px;
+}
+
+#navMain * ul > li:hover {
+	background-color: #727272;
+}
+.nav * ul > li > a {
+	display: block;
+	text-decoration: none;
+	color: var(--TextWhite);
+}
+#navMain > div.login {
+	float: right;
+}
+#navMain > div.login > div {
+	font-size: 14px;
+	height: 44px;
+	vertical-align: top;
+	display: inline-block;
+}
+#navMain > div.login > div > span {
+	display: block;
+}
+#navMain > div.login > div > span.loggedout {
+	padding-top: 10px;
+}
+#navMain > div.login > div > span.light {
+	font-weight: 100;
+}
+#navMain > div.login > span.userPhoto {
+	width: 44px;
+	height: 44px;
+	overflow: hidden;
+	border-radius: 50%;
+	margin-left: 15px;
+	display: inline-block;
+	background-color: #9933ff;
+	text-align: center;
+	font-size: 22px;
+}
+#navMain > div.login > span.notLoggedIn {
+	background-color: #a2a2a2;
+}
+#navMain > div.login > span.userPhoto > span {
+	padding-top: 5px;
+	display: block;
+}
+#navMain > div.login > span.userPhoto > img {
+	width: 44px;
+	height: 44px;
+}
+#navSub {
+	margin: 0px;
+	padding: 0px;
+	font-size: 14px;
+	background-color: var(--BackgroundBlue);
+	color: var(--TextWhite);
+	height: 36px;
+}
+
+
+
+/* Table */
+
+img.delete {
+	cursor: pointer;
+}
+
+
+div.table {
+	display: table;
+	font-size: 13px;
+}
+div.table div.head {
+	display: table-header-group;
+}
+div.table div.body {
+	display: table-row-group;
+}
+div.table div.head div.cell {
+	font-weight: bold;
+}
+div.table div.row {
+	display: table-row;
+}
+div.table div.cell {
+	border-bottom: 1px solid #bdc1c1;
+	padding: 5px;
+	display: table-cell;
+	overflow: hidden;
+	max-height: 30px;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+div.table div.body div.row:hover {
+	background: var(--TableHighlight);
+}
+
+div#mainBody {
+}
