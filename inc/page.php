@@ -22,6 +22,7 @@ TO DO list:
 */
 require_once dirname(__FILE__) . '/auth.php';
 require_once dirname(__FILE__) . '/graph.php';
+define('_NL', "\r\n");
 
 class sitePage {
 	var $page;
@@ -63,36 +64,61 @@ class sitePage {
 	}
 
 	function printNavigation() {
-		$nav['main'] = '<div id="navMain" class="nav"><div ' . ($this->logo ? ' style="background-image: url(\'' . $this->logo . '\'); padding-left: 50px; margin-left: 3px;"' : '') . ' class="title"><span>' . $this->title . '</span></div>';
+		$nav['main'] = '<div id="navMain" class="nav"><div ' . ($this->logo ? ' style="background-image: url(\'' . $this->logo . '\'); padding-left: 50px; margin-left: 3px;"' : '') . ' class="title"><span>' . $this->title . '</span></div>' . _NL;
 		$nav['main'] .= $this->printLoginItem();
-		$nav['sub'] = '<div id="navSub" class="nav">';
+		$nav['sub'] = '<div id="navSub" class="nav">' . _NL;
 		foreach ($this->mainNavigation as $navItem) {
-				$nav[$navItem->type] .= '<div ' . ($navItem->selected ? 'class="selected"' : '') . 'tabindex="-1" id="' . $navItem->id . '" style="float: ' . $navItem->position . '"' . ($navItem->flyoutAction ? ' onclick="JavaScript:openFlyout(\'' . $navItem->flyoutAction . '\', \'' . $navItem->flyoutTitle . '\');"' : '') . '><span>' . ($navItem->link ? '<a href="' . $navItem->link . '">' . $navItem->name . '</a>' : $navItem->name) . '</span>';
+			if ($navItem->type == 'main' || $navItem->type == 'sub') {
+				$nav[$navItem->type] .= '<div ' . ($navItem->selected ? 'class="selected"' : '') . 'tabindex="-1" id="' . $navItem->id . '" style="float: ' . $navItem->position . '"' . ($navItem->flyoutAction ? ' onclick="JavaScript:openFlyout(\'' . $navItem->flyoutAction . '\', \'' . $navItem->flyoutTitle . '\');"' : '') . ($navItem->link ? ' onclick="JavaScript:location.href=\'' . $navItem->link . '\';"' : '') . '><span>' . ($navItem->link ? '<a href="' . $navItem->link . '">' . $navItem->name . '</a>' : $navItem->name) . '</span>';
 				if ($navItem->subMenu) {
 					$nav[$navItem->type] .= $this->printNavigationItem($navItem);
 				}
-				$nav[$navItem->type] .= '</div>';
+				$nav[$navItem->type] .= '</div>' . _NL;
+			}
 		}
-		$nav['main'] .= '</div>';
-		$nav['sub'] .= '</div>';
-		return $nav['main'] . "\r\n" . $nav['sub'];
+		$nav['main'] .= '</div>' . _NL;
+		$nav['sub'] .= '</div>' . _NL;
+		return $nav['main'] . $nav['sub'];
 	}
 
 	function printNavigationItem($navItem, $level = 1) {
-		$output .= '<ul class="' . ($level == 1 ? 'odd' : 'even') . '">';
+		$output .= '<ul class="' . ($level == 1 ? 'odd' : 'even') . '">' . _NL;
 		foreach ($navItem->subMenu as $subItem) {
 			$output .= '<li ' . ($subItem->subMenu ? ' tabindex="-2" class="hasSubMenu"' : '') . ' id="' . $subItem->id . '"' . ($subItem->flyoutAction ? ' onclick="JavaScript:openFlyout(\'' . $subItem->flyoutAction . '\', \'' . $subItem->flyoutTitle . '\');"' : '')  . '>' . ($subItem->link ? '<a href="' . $subItem->link . '">' . $subItem->name . '</a>' : $subItem->name);
 			if ($subItem->subMenu) {
 				$output .= $this->printNavigationItem($subItem, ($level == 1 ? 2 : 1));
 			}
-			$output .= '</li>';
+			$output .= '</li>' . _NL;
 		}
-		$output .= '</ul>';
+		$output .= '</ul>' . _NL;
 		return $output;
 	}
 
+	function printSideNavigation() {
+		$output = '';
+		foreach ($this->mainNavigation as $navItem) {
+			if ($navItem->type == 'side') {
+				if (!$output) {
+					$output = '<div id="navSide">' . _NL;
+				}
+				$output .= '<div class="navSideGroup">' . $navItem->name . _NL;
+				if ($navItem->subMenu) {
+					$output .= '<ul>';
+					foreach ($navItem->subMenu as $subItem) {
+						$output .= '<li>' . ($subItem->link ? '<a href="' . $subItem->link . '">'  . $subItem->name . '</a>' : $subItem->name) .  '</li>' . _NL;
+					}
+					$output .= '</ul>' . _NL;
+				}
+				$output .= '</div>' . _NL;
+			}
+		}
+		if ($output) $output .= '</div>' . _NL;
+		return $output;
+	}
+
+
 	function printPage() {
-		return $this->printHead() . "\n" .  $this->flyout . "\n" . $this->printNavigation() . "\n" . '<div id="mainBody">' . "\n" . $this->page . "\n" . '</div>' . "\n" . $this->printFoot();
+		return $this->printHead() . _NL .  $this->flyout . _NL . $this->printNavigation() . '<div id="mainContainer">' . $this->printSideNavigation() . '<div id="mainBody">' . $this->page  . _NL . '</div></div>' . _NL . $this->printFoot();
 	}
 
 	function printFlyoutPage() {
@@ -109,11 +135,11 @@ class sitePage {
 				<script type="text/javascript" src="sitetemplate.js?' . mt_rand(5, 15). mt_rand(5, 15). mt_rand(5, 15). mt_rand(5, 15) . '"></script>
 				' . $this->script . '
 			</head>
-			<body id="' . ($flyout ? 'rdFlyout' : 'rdBody') . '" tabindex="-5">';
+			<body id="' . ($flyout ? 'flyout' : 'body') . '" tabindex="-5">';
 	}
 
 	function printfoot() {
-		return '</body></html>';
+		return '</body>' . _NL . '</html>';
 	}
 
 	function addContent($content) {
@@ -161,11 +187,12 @@ class navigationItem {
 	public $name;
 	public $subMenu;
 	public $position = 'left';	//left, centre, right
-	public $type = 'main';		//main, sub
+	public $type = 'main';		//main, sub, side
 	public $flyoutAction = '';	//URL to open in flyout on click
 	public $flyoutTitle = '';	//Title to show in flyout
 	public $link = '';		//URL to open on click, in main window
 	public $selected = 0;		//0: not selected, 1: item is selected. Applies to top level menu item only
+	public $icon = '';		//image link for side nav item
 
 	function __construct($name, $type='main', $position='left') {
 		$this->name = $name;
@@ -207,20 +234,20 @@ class pageTable {
 	}
 
 	function output() {
-		$output = '<div class="table"><div class="head"><div class="row">';
+		$output = '<div class="table">' . _NL . '<div class="head">' . _NL . '<div class="row">' . _NL;
 		foreach ($this->columns as $column) {
-			$output .= '<div class="cell" ' . ($column->width ? ' style="width: ' . $column->width . 'px; max-width: ' . $column->width . 'px;"' : '') . '>' . $column->text . '</div>';
+			$output .= '<div class="cell" ' . ($column->width ? ' style="width: ' . $column->width . 'px; max-width: ' . $column->width . 'px;"' : '') . '>' . $column->text . '</div>' . _NL;
 		}
-		$output .= '</div></div><div class="body">';
+		$output .= '</div>' . _NL . '</div>' . _NL . '<div class="body">' . _NL;
 		foreach ($this->rows as $row) {
-			$output .= '<div class="row">';
+			$output .= '<div class="row">' . _NL;
 			foreach ($row->column as $column => $data) {
 				$thisColumn = $this->getColumn($column);
-				$output .= '<div title="' . $data->tooltip . '" class="cell" '. ($thisColumn->width ? ' style="max-width: ' . $thisColumn->width . 'px;"' : '') . '>' . $data->text . '</div>';
+				$output .= '<div title="' . $data->tooltip . '" class="cell" '. ($thisColumn->width ? ' style="max-width: ' . $thisColumn->width . 'px;"' : '') . '>' . $data->text . '</div>' . _NL;
 			}
-			$output .= '</div>';
+			$output .= '</div>' . _NL;
 		}
-		$output .= '</div></div>';
+		$output .= '</div>' . _NL . '</div>' . _NL;
 		return $output;
 
 	}
@@ -268,11 +295,11 @@ class pageForm {
 	}
 
 	function output() {
-		$output = '<form action="' . $this->action . '" name="' . $this->name . '" method="POST" target="_parent">';
+		$output = '<form action="' . $this->action . '" name="' . $this->name . '" method="POST" target="_parent">' . _NL;
 		foreach ($this->fields as $field) {
 			$output .= $field->output();
 		}
-		$output .= '</form>';
+		$output .= '</form>' . _NL;
 		return $output;
 	}
 }
@@ -347,7 +374,7 @@ class pageFormField {
 				$output .= 'Unknown Field type: ' . $this->type;
 				break;
 		}
-		return $output;
+		return $output . _NL;
 
 	}
 

@@ -8,6 +8,7 @@ html {
 	--TableHighlight: #e2e2e2;
 	--FormPlaceholder: #656567;
 	--Required: #ff0000;
+	--BorderDarkGrey: #a6a6a6;
 }
 
 * {
@@ -17,7 +18,8 @@ html, body {
 	margin: 0px;
 	padding: 0px;
 	font-size: 13px;
-
+	max-height: 100vh;
+	height: 100vh;
 }
 
 /* Flyout */
@@ -362,6 +364,55 @@ div.dropdown li:hover {
 
 
 
+#mainContainer {
+	height: calc(100% - 90px);
+	position: relative;
+}
+#navSide {
+	width: 250px;
+	max-width: 250px;
+	float: left;
+}
+
+div#mainBody, #navSide {
+	height: 100%;
+	overflow-x: auto;
+	display: inline-block;
+}
+
+div#mainBody {
+	max-width: 100vw;
+	position: absolute;
+	top: 0px;
+
+}
+div#navSide + div#mainBody {
+	max-width: calc(100vw - 255px);
+}
+
+#navSide > div.navSideGroup {
+	font-weight: bold;
+	margin: 10px;
+	border: 1px dashed var(--BorderDarkGrey);
+	padding-left: 5px;
+}
+
+#navSide ul {
+	list-style-type: none;
+	margin: 0px;
+	padding: 0px;
+}
+
+#navSide ul li {
+	font-weight: normal;
+	padding: 5px 0px;
+	margin: 0px;
+}
+
+#navSide ul li a {
+	display: block;
+}
+
 /* Table */
 
 img.delete {
@@ -398,5 +449,3 @@ div.table div.body div.row:hover {
 	background: var(--TableHighlight);
 }
 
-div#mainBody {
-}
