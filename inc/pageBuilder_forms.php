@@ -5,19 +5,6 @@ Katy Nicholson
 https://katystech.blog/
 */
 
-/*TO DO list:
-
-- Forms:	Disabled elements - expand to cover all fields rather than just text
-		Dropdown and lists: If you set required="required" it requires every element to be selected at once
-		Dropdown and lists: Scroll bar for large lists
-		List: Allow unselect of item in single select list
-		Form validation - highlight missed/incorrect fields in red
-		Form validation - don't enable button until validation passes (different style for disabled buttons)
-- Table:	ISSUE: paging doesn't work if we use the pageTable class's sort routine, as we are sorting only the data on screen
-
-*/
-
-
 
 class pageForm {
 	public $action;

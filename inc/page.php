@@ -8,7 +8,9 @@ require_once dirname(__FILE__) . '/auth.php';
 require_once dirname(__FILE__) . '/graph.php';
 require_once dirname(__FILE__) . '/pageBuilder_tables.php';
 require_once dirname(__FILE__) . '/pageBuilder_forms.php';
+require_once dirname(__FILE__) . '/exception.php';
 define('_NL', "\r\n");
+
 
 class sitePage {
 	var $page;
@@ -19,16 +21,23 @@ class sitePage {
 	var $modGraph;
 	var $flyout;
 	var $preloadImages = array();
+	var $displayRole = 1;
 
 	public $logo;
 
 	function __construct($title = '', $script = '', $allowAnonymous = '0') {
 		$this->title = $title;
 		$this->script = $script;
-		$this->modAuth = new modAuth($allowAnonymous);
+		try {
+			$this->modAuth = new modAuth($allowAnonymous);
+		} catch (Exception $e) {
+			throw new siteException($e->getMessage());
+		}
+
 
 		if (!$allowAnonymous || $this->modAuth->isLoggedIn) $this->modGraph = new modGraph();
 	}
+
 
 	function addNavigation($navItem) {
 		$this->mainNavigation[] = $navItem;
@@ -40,7 +49,7 @@ class sitePage {
 			$profile = $this->modGraph->getProfile();
 			$photo = $this->modGraph->getPhoto();
 
-			return '<div class="login" tabindex="-1" id="m_login"><div><span>' . $profile->displayName . '</span><span class="light">' . $profile->userPrincipalName . '</span></div>' . $photo . '<ul><li>Role: ' . ($this->modAuth->checkUserRole('Role.User') ? 'User' : '') . ($this->modAuth->checkUserRole('Role.Admin') ? 'Admin' : '') . ($this->modAuth->checkUserRole('Default Access') ? 'Read Only' : '') . '</li><li><a href="https://login.microsoftonline.com/common/wsfederation?wa=wsignout1.0">Sign Out</a></li></ul></div>';
+			return '<div class="login" tabindex="-1" id="m_login"><div><span>' . $profile->displayName . '</span><span class="light">' . $profile->userPrincipalName . '</span></div>' . $photo . '<ul>' . ($this->displayRole ? '<li>Role: ' . ($this->modAuth->checkUserRole('Role.User') ? 'User' : '') . ($this->modAuth->checkUserRole('Role.Admin') ? 'Admin' : '') . ($this->modAuth->checkUserRole('Default Access') ? 'Read Only' : '') . '</li>' : '') . '<li><a href="' . (strpos($_SERVER['REQUEST_URI'], '?') ? explode('?', $_SERVER['REQUEST_URI'])[0] : $_SERVER['REQUEST_URI']) . '?action=logout">Sign Out</a></li></ul></div>';
 		}
 		$this->preloadImages[] = '/images/notLoggedIn.png';
 		return '<div class="login" tabindex="-1" id="m_login"><div><span class="loggedout">Not signed in</span></div><span class="userPhoto notLoggedIn"><img src="/images/notLoggedIn.png" /></span><ul><li><a href="' . $_SERVER['REQUEST_URI'] . (strstr($_SERVER['REQUEST_URI'], '?') ? '&' : '?') . 'login=1">Sign in</a></li></ul></div>';
@@ -58,7 +67,14 @@ class sitePage {
 		$nav['sub'] = '<div id="navSub" class="nav">' . _NL;
 		foreach ($this->mainNavigation as $navItem) {
 			if ($navItem->type == 'main' || $navItem->type == 'sub') {
-				$nav[$navItem->type] .= '<div ' . ($navItem->selected ? 'class="selected"' : '') . 'tabindex="-1" id="' . $navItem->id . '" style="float: ' . $navItem->position . '"' . ($navItem->flyoutAction ? ' onclick="JavaScript:openFlyout(\'' . $navItem->flyoutAction . '\', \'' . $navItem->flyoutTitle . '\');"' : '') . ($navItem->link ? ' onclick="JavaScript:location.href=\'' . $navItem->link . '\';"' : '') . '><span>' . ($navItem->link ? '<a href="' . $navItem->link . '">' . $navItem->name . '</a>' : $navItem->name) . '</span>';
+				$nav[$navItem->type] .= '<div style="float: ' . $navItem->position . ';' . 
+					($navItem->icon ? ' background-image: url(\'/images/' . $navItem->icon . '\'); ' : '') . 
+					($navItem->width ? ' width: ' . $navItem->width . 'px;" ' : '" ') . 
+					($navItem->tooltip ? 'title="' . htmlentities($navItem->tooltip) . '" ' : '') .  
+					($navItem->selected ? 'class="selected"' : '') . 
+					'tabindex="-1" id="' . $navItem->id . '" ' . 
+					($navItem->flyoutAction ? ' onclick="JavaScript:openFlyout(\'' . $navItem->flyoutAction . '\', \'' . $navItem->flyoutTitle . '\');"' : '') . 
+					($navItem->link ? ' onclick="JavaScript:' . ($navItem->newWindow ? 'window.open(' : 'location.href=') . '\'' . $navItem->link . '\'' . ($navItem->newWindow ? ')' : '') . ';"' : '') . '><span>' .  $navItem->name  . '</span>';
 				if ($navItem->subMenu) {
 					$nav[$navItem->type] .= $this->printNavigationItem($navItem);
 				}
@@ -73,7 +89,9 @@ class sitePage {
 	function printNavigationItem($navItem, $level = 1) {
 		$output .= '<ul class="' . ($level == 1 ? 'odd' : 'even') . '">' . _NL;
 		foreach ($navItem->subMenu as $subItem) {
-			$output .= '<li ' . ($subItem->subMenu ? ' tabindex="-2" class="hasSubMenu"' : '') . ' id="' . $subItem->id . '"' . ($subItem->flyoutAction ? ' onclick="JavaScript:openFlyout(\'' . $subItem->flyoutAction . '\', \'' . $subItem->flyoutTitle . '\');"' : '')  . '>' . ($subItem->link ? '<a href="' . $subItem->link . '">' . $subItem->name . '</a>' : $subItem->name);
+			$output .= '<li ' . ($subItem->subMenu ? ' tabindex="-2" class="hasSubMenu"' : '') . ' id="' . $subItem->id . '"' . 
+				($subItem->flyoutAction ? ' onclick="JavaScript:openFlyout(\'' . $subItem->flyoutAction . '\', \'' . $subItem->flyoutTitle . '\');"' : '')  . '>' . 
+				($subItem->link ? '<a href="' . $subItem->link . '">' . $subItem->name . '</a>' : $subItem->name);
 			if ($subItem->subMenu) {
 				$output .= $this->printNavigationItem($subItem, ($level == 1 ? 2 : 1));
 			}
@@ -94,8 +112,12 @@ class sitePage {
 				if ($navItem->subMenu) {
 					$output .= '<ul>';
 					foreach ($navItem->subMenu as $subItem) {
-						if ($subItem->icon) $this->preloadImages[] = '/images/sidenav/' . $subItem->icon;
-						$output .= '<li' .  ($subItem->link ? ' onclick="JavaScript:location.href=\'' . $subItem->link . '\';"' : '') . ($subItem->flyoutAction ? ' onclick="JavaScript:openFlyout(\'' . $subItem->flyoutAction . '\', \'' . $subItem->flyoutTitle . '\');"' : '') . ($subItem->icon ? ' style="background-image: url(\'/images/sidenav/' . $subItem->icon . '\');"' : '') . ($subItem->selected ? ' class="selected"' : '') . '>' . ($subItem->link ? '<a href="' . $subItem->link . '">'  . $subItem->name . '</a>' : $subItem->name) .  '</li>' . _NL;
+						if ($subItem->type == 'dropdown') {
+							$output .= '<li class="dropdown"> ' . $subItem->outputDropdown() . '</li>';
+						} else {
+							if ($subItem->icon) $this->preloadImages[] = '/images/sidenav/' . $subItem->icon;
+							$output .= '<li' .  ($subItem->link ? ' onclick="JavaScript:location.href=\'' . $subItem->link . '\';"' : '') . ($subItem->flyoutAction ? ' onclick="JavaScript:openFlyout(\'' . $subItem->flyoutAction . '\', \'' . $subItem->flyoutTitle . '\');"' : '') . ($subItem->icon ? ' style="background-image: url(\'/images/sidenav/' . $subItem->icon . '\');"' : '') . ($subItem->selected ? ' class="selected"' : '') . '>' . ($subItem->link ? '<a href="' . $subItem->link . '">'  . $subItem->name . '</a>' : $subItem->name) .  '</li>' . _NL;
+						}
 					}
 					$output .= '</ul>' . _NL;
 				}
@@ -183,12 +205,17 @@ class navigationItem {
 	public $name;
 	public $subMenu;
 	public $position = 'left';	//left, centre, right
-	public $type = 'main';		//main, sub, side
+	public $type = 'main';		//main, sub, side, dropdown
 	public $flyoutAction = '';	//URL to open in flyout on click
 	public $flyoutTitle = '';	//Title to show in flyout
 	public $link = '';		//URL to open on click, in main window
 	public $selected = 0;		//0: not selected, 1: item is selected. Applies to top level menu item only
 	public $icon = '';		//image link for side nav item
+	public $tooltip;		//tooltiptext
+	public $newWindow;		// open link in new window
+	public $width;			//use with icon to set fixed width
+	public $options;		//use with dropdown only
+	public $action;			//use with dropdown only
 
 	function __construct($name, $type='main', $position='left') {
 		$this->name = $name;
@@ -200,6 +227,18 @@ class navigationItem {
 	function addItem($subItem) {
 		$this->subMenu[] = $subItem;
 		return $subItem;
+	}
+
+	function outputDropdown() {
+
+		$output = '<div class="dropdown" tabindex="-2"><span onclick="dropdownClose(\'' . $this->id . '\');" id="' . $this->id . ($this->value ? '">' . $this->options[$this->value] : '" class="placeholder">' . $this->name) . '</span><ul id="u' . $this->id . '">';
+		foreach ($this->options as $listValue => $listText) {
+		        $thisRowID = 'r' . uniqid();
+		        $thisLabelID = 'l' . uniqid();
+		        $output .= '<li><input ' . ($this->value == $listValue ? 'checked="checked" ' : '') . 'type="radio" class="hidden" name="' . $this->name . '" id="' . $thisRowID . '" value="' . $listValue . '" onclick="JavaScript:dropdownSelected(\'' . $this->id . '\', \'' . $thisLabelID . '\');" onchange="JavaScript:location.href=\'' . str_replace('$VALUE', $listValue, $this->action) . '\';"><label id="' . $thisLabelID . '" for="' . $thisRowID . '">' . $listText . '</label></li>';
+		}
+		$output .= '</ul></div>';
+		return $output;
 	}
 
 }

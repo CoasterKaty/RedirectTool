@@ -1,3 +1,3 @@
 <?php
-header('Location: https://katystech.blog/');
+header('Location: /link.php');
 ?>

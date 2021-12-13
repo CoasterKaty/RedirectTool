@@ -13,6 +13,7 @@ CREATE TABLE `tblDomains` (
   `intDomainID` int(11) NOT NULL AUTO_INCREMENT,
   `txtDomain` varchar(255) DEFAULT NULL,
   `txtOwner` varchar(255) DEFAULT NULL,
+  `txtDefaultURL` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`intDomainID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 CREATE TABLE `tblUrls` (
@@ -22,5 +23,15 @@ CREATE TABLE `tblUrls` (
   `intHits` int(11) DEFAULT 0,
   `dtCreated` timestamp DEFAULT current_timestamp(),
   `txtCreator` varchar(255) DEFAULT NULL,
+  `intDomainID` int(11) NOT NULL DEFAULT 1,
   PRIMARY KEY (`intLinkID`)
   ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `tblSettings` (
+  `intSettingID` int(11) NOT NULL AUTO_INCREMENT,
+  `txtName` varchar(255) DEFAULT NULL,
+  `txtValue` TEXT DEFAULT NULL,
+  PRIMARY KEY (`intSettingID`)
+);
+
+INSERT INTO `tblSettings` (`txtName`, `txtValue`) VALUES ('listItems', '25');
