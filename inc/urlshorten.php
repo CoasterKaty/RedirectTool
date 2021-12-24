@@ -35,8 +35,7 @@ class urlShorten extends baseClass {
 		if ($this->modAuth->checkUserRole('Role.Admin')) {
 			$count = $this->modDB->Count('SELECT * FROM tblUrls' . ($domainID ? ' WHERE intDomainID=\'' . $this->modDB->Escape($domainID) . '\'' : ''));
 		} else {
-// TO DO this query
-			$count = $this->modDB->Count('SELECT * FROM tblUrls' . ($domainID ? ' WHERE intDomainID=\'' . $this->modDB->Escape($domainID) . '\'' : ''));
+			$count = $this->modDB->Count('SELECT tblUrls.* FROM tblUrls LEFT OUTER JOIN tblDomains USING (intDomainID) WHERE tblDomains.intRestricted=0 OR (tblDomains.intRestricted=1 AND tblDomains.txtOwner=\'' . $this->modDB->Escape($this->modAuth->userName) . '\')' . ($domainID ? ' AND intDomainID=\'' . $this->modDB->Escape($domainID) . '\'' : ''));
 		}
 		return ceil($count / $pageSize);
 	}
