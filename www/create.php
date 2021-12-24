@@ -193,7 +193,7 @@ if ($modAuth->checkUserRole('Role.Admin') || $modAuth->checkUserRole('Role.User'
 			$pageDomain = ($_GET['domain'] == 'ALL' ? '' : $_GET['domain']);
 			$pageCount =  $urlShorten->getPageCount($urlShorten->settings['listItems'], $pageDomain);
 			if ($pageCount == 0) {
-				header('Location: create.php?action=domain';
+				header('Location: create.php?action=domains');
 				exit;
 			}
 			if ($pageCount < $pageNumber) $pageNumber = $pageCount;
