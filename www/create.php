@@ -201,6 +201,7 @@ if ($modAuth->checkUserRole('Role.Admin') || $modAuth->checkUserRole('Role.User'
 			$pageCount =  $urlShorten->getPageCount($urlShorten->settings['listItems'], $pageDomain);
 			if ($pageCount < $pageNumber) $pageNumber = $pageCount;
 
+			//TODO: Get all domains, don't limit to 100
 			$domains = $urlShorten->getDomains(1, 100);
 			$domainOptions['ALL'] = 'All Domains';
 			foreach ($domains as $domainIndex => $domain) {
@@ -208,20 +209,19 @@ if ($modAuth->checkUserRole('Role.Admin') || $modAuth->checkUserRole('Role.User'
 			}
 
 			if ($pageCount == 0) {
-				if (count($domains) < 1) {
+				if (!$domains) {
 					$thisPage->addContent(new infoTip('You must add at least one domain before creating short links.', 'error'));
 				} else {
 					$thisPage->addContent(new infoTip('There are no links configured.', 'warning'));
 				}
 			}
 
-
 			$domainDropdown = $sideNav->addItem(new navigationItem('Select Domain', 'dropdown'));
 			$domainDropdown->options = $domainOptions;
 			$domainDropdown->action = 'create.php?domain=$VALUE&page=' . $pageNumber;
 			$domainDropdown->value = ($pageDomain ? $pageDomain : 'ALL');
 
-			if (count($domains) > 0) {
+			if ($domains) {
 				$createButton = $sideNav->addItem(new navigationItem('New Link', 'side'));
 				$createButton->icon = 'new.png';
 				$createButton->flyoutAction = 'create.php?action=addLink&flyout=1&domain=' . ($pageDomain != 'ALL' ? $pageDomain : '');
