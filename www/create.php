@@ -192,6 +192,10 @@ if ($modAuth->checkUserRole('Role.Admin') || $modAuth->checkUserRole('Role.User'
 			$sideNav = new navigationItem('', 'side');
 			$pageDomain = ($_GET['domain'] == 'ALL' ? '' : $_GET['domain']);
 			$pageCount =  $urlShorten->getPageCount($urlShorten->settings['listItems'], $pageDomain);
+			if ($pageCount == 0) {
+				header('Location: create.php?action=domain';
+				exit;
+			}
 			if ($pageCount < $pageNumber) $pageNumber = $pageCount;
 
 			$domains = $urlShorten->getDomains(1, 100);
