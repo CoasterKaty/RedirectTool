@@ -46,7 +46,6 @@ class urlShorten extends baseClass {
 		} else {
 			if ($domain) {
 				$defaultURL = $this->modDB->QuerySingle('SELECT txtDefaultURL from tblDomains WHERE txtDomain = \'' . $this->modDB->Escape($domain) . '\'');
-				die('Return default URL');
 				return array('txtUrl' => $defaultURL['txtDefaultURL']);
 			} else {
 				return;
