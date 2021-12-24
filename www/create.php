@@ -25,60 +25,66 @@ if ($modAuth->checkUserRole('Role.Admin') || $modAuth->checkUserRole('Role.User'
 
 	switch ($pageAction) {
 		case 'addDomain':
-			if ($pageSubmitted) {
-				if($_POST['domain']) {
-					$urlShorten->addDomain(array('domain' => $_POST['domain'], 'defaultURL' => $_POST['defaultURL']), $profile->userPrincipalName);
+			if ($modAuth->checkUserRole('Role.Admin')) {
+				if ($pageSubmitted) {
+					if($_POST['domain']) {
+						$urlShorten->addDomain(array('domain' => $_POST['domain'], 'defaultURL' => $_POST['defaultURL'], 'restricted' => ($_POST['restricted'] ? '1' : '0')));
+					}
+					header('Location: ' . urldecode($_POST['httpReferer']));
+					exit;
 				}
-				header('Location: ' . urldecode($_POST['httpReferer']));
-				exit;
+				$createForm = new pageForm('addDomain', 'create.php?action=addDomain&submitted=1');
+				$createForm->method = 'post';
+				$domainField = $createForm->addField(new pageFormField('domain', 'text'));
+				$domainField->label = 'Domain name';
+				$domainField->help = 'Adds a domain to the system, you must already have registered the domain, configured DNS to point at this server and configured the web server (Apache, IIS etc) to respond to this domain';
+				$domainField->placeholder = 'contoso.com';
+				$domainField->required = 1;
+
+				$domainURLField = $createForm->addField(new pageFormField('defaultURL', 'text'));
+				$domainURLField->label = 'Default Redirect';
+				$domainURLField->help = 'Default location to redirect the user if the requested short URL does not exist';
+				$domainURLField->placeholder = 'https://www.contoso.com/';
+				$domainURLField->required = 1;
+
+				$restrictedField = $createForm->addField(new pageFormField('restricted', 'toggle'));
+				$restrictedField->label = 'Restricted Domain';
+				$restrictedField->help = 'Hides this domain and prevents standard users from creating short links on this domain';
+
+				$submitButton = $createForm->addField(new pageFormField('save', 'submit'));
+				$submitButton->value = 'Create';
+				$thisPage->addContent($createForm);
+				echo $thisPage->printFlyoutPage();
 			}
-			$createForm = new pageForm('addDomain', 'create.php?action=addDomain&submitted=1');
-			$createForm->method = 'post';
-			$domainField = $createForm->addField(new pageFormField('domain', 'text'));
-			$domainField->label = 'Domain name';
-			$domainField->help = 'Adds a domain to the system, you must already have registered the domain, configured DNS to point at this server and configured the web server (Apache, IIS etc) to respond to this domain';
-			$domainField->placeholder = 'contoso.com';
-			$domainField->required = 1;
-
-			$domainURLField = $createForm->addField(new pageFormField('defaultURL', 'text'));
-			$domainURLField->label = 'Default Redirect';
-			$domainURLField->help = 'Default location to redirect the user if the requested short URL does not exist';
-			$domainURLField->placeholder = 'https://www.contoso.com/';
-			$domainURLField->required = 1;
-
-			$submitButton = $createForm->addField(new pageFormField('save', 'submit'));
-			$submitButton->value = 'Create';
-			$thisPage->addContent($createForm);
-			echo $thisPage->printFlyoutPage();
-
 			exit;
 		case 'settings':
-			if ($pageSubmitted) {
-				$urlShorten->saveSettings(array(	'listItems'	 => $_POST['listItems']
-							));
-				header('Location: ' . urldecode($_POST['httpReferer']));
-				exit;
+			if ($modAuth->checkUserRole('Role.Admin')) {
+				if ($pageSubmitted) {
+					$urlShorten->saveSettings(array(	'listItems'	 => $_POST['listItems']
+								));
+					header('Location: ' . urldecode($_POST['httpReferer']));
+					exit;
+				}
+				$settingsForm = new pageForm('settings', 'create.php?action=settings&submitted=1');
+	                        $listCountField = $settingsForm->addField(new pageFormField('listItems', 'number'));
+	                        $listCountField->label = 'Number of rows to show in list';
+	                        $listCountField->help = 'Results in lists are split into pages. About 25 is about right for 1080p resolution.';
+	                        $listCountField->required = 1;
+	                        $listCountField->min = 10;
+	                        $listCountField->max = 100;
+	                        $listCountField->value = $urlShorten->settings['listItems'];
+
+        	                $saveButton = $settingsForm->addField(new pageFormField('save', 'submit'));
+	                        $saveButton->value = 'Update';
+
+	                        $thisPage->addContent($settingsForm);
+	                        echo $thisPage->printFlyoutPage();
 			}
-			$settingsForm = new pageForm('settings', 'create.php?action=settings&submitted=1');
-                        $listCountField = $settingsForm->addField(new pageFormField('listItems', 'number'));
-                        $listCountField->label = 'Number of rows to show in list';
-                        $listCountField->help = 'Results in lists are split into pages. About 25 is about right for 1080p resolution.';
-                        $listCountField->required = 1;
-                        $listCountField->min = 10;
-                        $listCountField->max = 100;
-                        $listCountField->value = $urlShorten->settings['listItems'];
-
-                        $saveButton = $settingsForm->addField(new pageFormField('save', 'submit'));
-                        $saveButton->value = 'Update';
-
-                        $thisPage->addContent($settingsForm);
-                        echo $thisPage->printFlyoutPage();
                         exit;
-
 		case 'addLink':
 			if ($pageSubmitted) {
 				if ($_POST['url'] && $_POST['slug']) {
-					$urlShorten->createUrl(array('slug' => $_POST['slug'], 'url' => $_POST['url'], 'domainID' => $_POST['domain']), $profile->userPrincipalName);
+					$urlShorten->createUrl(array('slug' => $_POST['slug'], 'url' => $_POST['url'], 'domainID' => $_POST['domain']));
 					header('Location: /create.php?page=' . $urlShorten->getPageCount($urlShorten->settings['listItems']));
 					exit;
 				}
@@ -111,62 +117,63 @@ if ($modAuth->checkUserRole('Role.Admin') || $modAuth->checkUserRole('Role.User'
 			echo $thisPage->printFlyoutPage();
 			exit;
 		case 'delete':
-			$urlShorten->deleteUrl($_GET['id'], $profile->userPrincipalName, $modAuth->userRoles);
+			$urlShorten->deleteUrl($_GET['id']);
 			header('Location: /create.php?page=' . $page);
 			exit;
 		case 'deleteDomain':
-			$urlShorten->deleteDomain($_GET['id'], $profile->userPrincipalName, $modAuth->userRoles);
+			if ($modAuth->checkUserRole('Role.Admin')) {
+				$urlShorten->deleteDomain($_GET['id']);
+			}
 			header('Location: /create.php?action=domains&page=' . $page);
 			exit;
 		case 'domains':
-			$sideNav = new navigationItem('', 'side');
-			$addDomain = $sideNav->addItem(new navigationItem('Add Domain', 'side'));
-			$addDomain->flyoutAction = 'create.php?action=addDomain';
-			$addDomain->flyoutTitle = 'Add Domain';
-			$addDomain->icon = 'NewDomain.png';
-			$thisPage->addNavigation($sideNav);
-
 			if ($modAuth->checkUserRole('Role.Admin')) {
+				$sideNav = new navigationItem('', 'side');
+				$addDomain = $sideNav->addItem(new navigationItem('Add Domain', 'side'));
+				$addDomain->flyoutAction = 'create.php?action=addDomain';
+				$addDomain->flyoutTitle = 'Add Domain';
+				$addDomain->icon = 'NewDomain.png';
+				$thisPage->addNavigation($sideNav);
+
 				$sideNav2 = new navigationItem('Configuration', 'side');
 				$linksNav = $sideNav2->addItem(new navigationItem('Short URLs', 'side'));
 				$linksNav->link = 'create.php';
 				$linksNav->icon = 'ShortURL.png';
-
 				$settingsNav = $sideNav2->addItem(new navigationItem('Settings', 'side'));
 				$settingsNav->flyoutAction = 'create.php?action=settings';
 				$settingsNav->flyoutTitle = 'Settings';
 				$settingsNav->icon = 'Settings.png';
 				$thisPage->addNavigation($sideNav2);
-			}
 
-			$domains = $urlShorten->getDomains($pageNumber, $urlShorten->settings['listItems']);
-			$domainTable = new pageTable();
-			$domainTable->addColumn(new pageTableColumn('Domain'));
-			$domainTable->addColumn(new pageTableColumn('Default URL', '700'));
-			$domainTable->addColumn(new pageTableColumn('Created By'));
-			$domainTable->pages = 1;
-			$domainTable->page = $pageNumber;
-			$domainTable->pageSize = $urlShorten->settings['listItems'];
-			$domainTable->pageCount = $urlShorten->getDomainPageCount($urlShorten->settings['listItems']);
-			$domainTable->pageURL = 'create.php';
+				$domains = $urlShorten->getDomains($pageNumber, $urlShorten->settings['listItems']);
+				$domainTable = new pageTable();
+				$domainTable->addColumn(new pageTableColumn('Domain'));
+				$domainTable->addColumn(new pageTableColumn('Default URL', '700'));
+				$domainTable->addColumn(new pageTableColumn('Created By'));
+				$domainTable->pages = 1;
+				$domainTable->page = $pageNumber;
+				$domainTable->pageSize = $urlShorten->settings['listItems'];
+				$domainTable->pageCount = $urlShorten->getDomainPageCount($urlShorten->settings['listItems']);
+				$domainTable->pageURL = 'create.php';
 
-			$editableMenu = new pageTableMenu();
-			$deleteBtn = $editableMenu->addItem(new pageTableMenuItem('Delete', 'create.php?action=deleteDomain&id=$ID'));
-			$deleteBtn->icon = 'Delete.png';
-			$deleteBtn->confirm = 'Are you sure you want to delete $NAME?';
+				$editableMenu = new pageTableMenu();
+				$deleteBtn = $editableMenu->addItem(new pageTableMenuItem('Delete', 'create.php?action=deleteDomain&id=$ID'));
+				$deleteBtn->icon = 'Delete.png';
+				$deleteBtn->confirm = 'Are you sure you want to delete $NAME?';
 
-			foreach ($domains as $domainID => $domain) {
-				$tableRow = $domainTable->addRow();
-				$tableRow->column['Domain']->text = $domain['txtDomain'];
-				$tableRow->column['Default URL']->text = $domain['txtDefaultURL'];
-				$tableRow->column['Created By']->text = $domain['txtOwner'];
-				$tableRow->linkID = $domain['intDomainID'];
-				$tableRow->name = $domain['txtDomain'];
-				if ($modAuth->checkUserRole('Role.Admin') || strtolower($domain['txtOwner']) == strtolower($modAuth->userName)) {
-					$tableRow->menu = $editableMenu;
+				foreach ($domains as $domainID => $domain) {
+					$tableRow = $domainTable->addRow();
+					$tableRow->column['Domain']->text = $domain['txtDomain'];
+					$tableRow->column['Default URL']->text = $domain['txtDefaultURL'];
+					$tableRow->column['Created By']->text = $domain['txtOwner'];
+					$tableRow->linkID = $domain['intDomainID'];
+					$tableRow->name = $domain['txtDomain'];
+					if ($modAuth->checkUserRole('Role.Admin') || strtolower($domain['txtOwner']) == strtolower($modAuth->userName)) {
+						$tableRow->menu = $editableMenu;
+					}
 				}
+				$thisPage->addContent($domainTable);
 			}
-			$thisPage->addContent($domainTable);
 			break;
 		default:
 			$sideNav = new navigationItem('', 'side');
@@ -192,17 +199,22 @@ if ($modAuth->checkUserRole('Role.Admin') || $modAuth->checkUserRole('Role.User'
 			$thisPage->addNavigation($sideNav);
 
 
+
 			if ($modAuth->checkUserRole('Role.Admin')) {
 				$sideNav2 = new navigationItem('Configuration', 'side');
+
 				$addDomain = $sideNav2->addItem(new navigationItem('Domains', 'side'));
 				$addDomain->link = 'create.php?action=domains';
 				$addDomain->icon = 'Domains.png';
+
 				$settingsNav = $sideNav2->addItem(new navigationItem('Settings', 'side'));
 				$settingsNav->flyoutAction = 'create.php?action=settings';
 				$settingsNav->flyoutTitle = 'Settings';
 				$settingsNav->icon = 'Settings.png';
 				$thisPage->addNavigation($sideNav2);
+
 			}
+
 
 			$urls = $urlShorten->listUrls($pageNumber, $urlShorten->settings['listItems'], $pageDomain);
 			$urlTable = new pageTable();

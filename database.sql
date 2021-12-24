@@ -14,6 +14,7 @@ CREATE TABLE `tblDomains` (
   `txtDomain` varchar(255) DEFAULT NULL,
   `txtOwner` varchar(255) DEFAULT NULL,
   `txtDefaultURL` varchar(255) DEFAULT NULL,
+  `intRestricted` INT NOT NULL DEFAULT 0,
   PRIMARY KEY (`intDomainID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 CREATE TABLE `tblUrls` (
