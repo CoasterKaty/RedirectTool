@@ -141,6 +141,7 @@ if ($modAuth->checkUserRole('Role.Admin') || $modAuth->checkUserRole('Role.User'
 			exit;
 		case 'domains':
 			if ($modAuth->checkUserRole('Role.Admin')) {
+				$pageCount = $urlShorten->getDomainPageCount($urlShorten->settings['listItems']);
 				$sideNav = new navigationItem('', 'side');
 				$addDomain = $sideNav->addItem(new navigationItem('Add Domain', 'side'));
 				$addDomain->flyoutAction = 'create.php?action=addDomain';
@@ -158,7 +159,11 @@ if ($modAuth->checkUserRole('Role.Admin') || $modAuth->checkUserRole('Role.User'
 				$settingsNav->icon = 'Settings.png';
 				$thisPage->addNavigation($sideNav2);
 
-				$domains = $urlShorten->getDomains($pageNumber, $urlShorten->settings['listItems']);
+				if ($pageCount > 0) {
+					$domains = $urlShorten->getDomains($pageNumber, $urlShorten->settings['listItems']);
+				} else {
+					$thisPage->addContent(new infoTip('There are no domains configured, please add a new domain', 'warning'));
+				}
 				$domainTable = new pageTable();
 				$domainTable->addColumn(new pageTableColumn('Domain'));
 				$domainTable->addColumn(new pageTableColumn('Default URL', '700'));
@@ -166,7 +171,7 @@ if ($modAuth->checkUserRole('Role.Admin') || $modAuth->checkUserRole('Role.User'
 				$domainTable->pages = 1;
 				$domainTable->page = $pageNumber;
 				$domainTable->pageSize = $urlShorten->settings['listItems'];
-				$domainTable->pageCount = $urlShorten->getDomainPageCount($urlShorten->settings['listItems']);
+				$domainTable->pageCount = $pageCount;
 				$domainTable->pageURL = 'create.php';
 
 				$editableMenu = new pageTableMenu();
@@ -174,15 +179,17 @@ if ($modAuth->checkUserRole('Role.Admin') || $modAuth->checkUserRole('Role.User'
 				$deleteBtn->icon = 'Delete.png';
 				$deleteBtn->confirm = 'Are you sure you want to delete $NAME?';
 
-				foreach ($domains as $domainID => $domain) {
-					$tableRow = $domainTable->addRow();
-					$tableRow->column['Domain']->text = $domain['txtDomain'];
-					$tableRow->column['Default URL']->text = $domain['txtDefaultURL'];
-					$tableRow->column['Created By']->text = $domain['txtOwner'];
-					$tableRow->linkID = $domain['intDomainID'];
-					$tableRow->name = $domain['txtDomain'];
-					if ($modAuth->checkUserRole('Role.Admin') || strtolower($domain['txtOwner']) == strtolower($modAuth->userName)) {
-						$tableRow->menu = $editableMenu;
+				if ($domains) {
+					foreach ($domains as $domainID => $domain) {
+						$tableRow = $domainTable->addRow();
+						$tableRow->column['Domain']->text = $domain['txtDomain'];
+						$tableRow->column['Default URL']->text = $domain['txtDefaultURL'];
+						$tableRow->column['Created By']->text = $domain['txtOwner'];
+						$tableRow->linkID = $domain['intDomainID'];
+						$tableRow->name = $domain['txtDomain'];
+						if ($modAuth->checkUserRole('Role.Admin') || strtolower($domain['txtOwner']) == strtolower($modAuth->userName)) {
+							$tableRow->menu = $editableMenu;
+						}
 					}
 				}
 				$thisPage->addContent($domainTable);
