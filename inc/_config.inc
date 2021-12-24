@@ -12,6 +12,7 @@
  *
  */
 
+error_reporting(E_ERROR);
 
 // MySQL connection details
 define('_MYSQL_HOST', 'localhost');
