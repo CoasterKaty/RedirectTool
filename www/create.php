@@ -229,7 +229,9 @@ if ($modAuth->checkUserRole('Role.Admin') || $modAuth->checkUserRole('Role.User'
 			}
 
 
-			$urls = $urlShorten->listUrls($pageNumber, $urlShorten->settings['listItems'], $pageDomain);
+			if ($pageCount > 0) {
+				$urls = $urlShorten->listUrls($pageNumber, $urlShorten->settings['listItems'], $pageDomain);
+			}
 			$urlTable = new pageTable();
 			$urlTable->addColumn(new pageTableColumn('Link'));
 			$urlTable->addColumn(new pageTableColumn('Redirect to', '700'));
@@ -247,18 +249,20 @@ if ($modAuth->checkUserRole('Role.Admin') || $modAuth->checkUserRole('Role.User'
 			$deleteBtn->icon = 'Delete.png';
 			$deleteBtn->confirm = 'Are you sure you want to delete $NAME?';
 
-			foreach ($urls as $urlID => $url) {
-				$tableRow = $urlTable->addRow();
-				$tableRow->column['Hits']->text = $url['intHits'];
-				$tableRow->column['Link']->text = $url['txtDomain'] . '/' . $url['txtSlug'];
-				$tableRow->column['Redirect to']->text = $url['txtUrl'];
-				$tableRow->column['Redirect to']->tooltip = $url['txtUrl'];
-				$tableRow->column['Created On']->text = $urlShorten->prettyDate($url['dtCreated']);
-				$tableRow->column['Created By']->text = $url['txtCreator'];
-				$tableRow->linkID = $url['intLinkID'];
-				$tableRow->name = $url['txtDomain'] . '/' . $url['txtSlug'];
-				if ($modAuth->checkUserRole('Role.Admin') || strtolower($url['txtCreator']) == strtolower($modAuth->userName)) {
-					$tableRow->menu = $editableMenu;
+			if ($urls) {
+				foreach ($urls as $urlID => $url) {
+					$tableRow = $urlTable->addRow();
+					$tableRow->column['Hits']->text = $url['intHits'];
+					$tableRow->column['Link']->text = $url['txtDomain'] . '/' . $url['txtSlug'];
+					$tableRow->column['Redirect to']->text = $url['txtUrl'];
+					$tableRow->column['Redirect to']->tooltip = $url['txtUrl'];
+					$tableRow->column['Created On']->text = $urlShorten->prettyDate($url['dtCreated']);
+					$tableRow->column['Created By']->text = $url['txtCreator'];
+					$tableRow->linkID = $url['intLinkID'];
+					$tableRow->name = $url['txtDomain'] . '/' . $url['txtSlug'];
+					if ($modAuth->checkUserRole('Role.Admin') || strtolower($url['txtCreator']) == strtolower($modAuth->userName)) {
+						$tableRow->menu = $editableMenu;
+					}
 				}
 			}
 			$thisPage->addContent($urlTable);
