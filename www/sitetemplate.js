@@ -92,13 +92,9 @@ function submitForm(formID) {
 	}
 
 
-	if (validateForm(formID, elSubmit)) {
-		console.log('validateForm returned true');
-	} else {
-		console.log('validateForm returned false');
+	if (!validateForm(formID, elSubmit)) {
 		return false;
 	}
-	console.log('Continuing submitForm');
 
 	if (elSubmit) elSubmit.disabled = true;
 
@@ -124,10 +120,13 @@ function submitForm(formID) {
 }
 
 function validateForm(formID, elSubmit) {
-console.log('validateForm called');
 	var elForm = document.getElementById(formID);
 	var formValidate = elForm.getAttribute('data-validate');
 	var validateCheck = elForm.getAttribute('data-validate-process');
+	if (!formValidate) {
+		clearUnsavedFlyout();
+		return true;
+	}
 	switch (validateCheck) {
 		case '0':
 			//Not started yet.
@@ -144,26 +143,20 @@ console.log('validateForm called');
 				}
 			};
 			xhr.send(formData);
-			console.log('validateForm sent XHR request');
 
 			return false;
 		case '1':
-			console.log('validateForm waiting for XHR');
 
 			//Still running
 			return false;
 		case '2':
 			// Validation completed
-			console.log('validateForm XHR completed');
 			if (elSubmit) elSubmit.disabled = false;
 
 			var validateResult = document.getElementById(formID).getAttribute('data-validate-result');
 			if (validateResult == '1') {
-				console.log('validated OK');
-
 				return true;
 			} else {
-				console.log('Not validated OK' + validateResult);
 				document.getElementById('error' + formID).style.display = 'block';
 				document.getElementById('error' + formID).innerHTML = '<span>' + validateResult + '</span>';
 				document.getElementById(formID).setAttribute('data-validate-process', '0');
