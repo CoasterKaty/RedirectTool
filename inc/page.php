@@ -24,6 +24,7 @@ class sitePage {
 	var $displayRole = 1;
 
 	public $logo;
+	public $logoWidth = 48;
 
 	function __construct($title = '', $script = '', $allowAnonymous = '0') {
 		$this->title = $title;
@@ -62,7 +63,7 @@ class sitePage {
 	}
 
 	function printNavigation() {
-		$nav['main'] = '<div id="navMain" class="nav"><div ' . ($this->logo ? ' style="background-image: url(\'' . $this->logo . '\'); padding-left: 50px; margin-left: 3px;"' : '') . ' class="title"><span>' . $this->title . '</span></div>' . _NL;
+		$nav['main'] = '<div id="navMain" class="nav"><div ' . ($this->logo ? ' style="background-image: url(\'' . $this->logo . '\'); padding-left: ' . (2 + $this->logoWidth) . 'px; margin-left: 3px;"' : '') . ' class="title"><span>' . $this->title . '</span></div>' . _NL;
 		$nav['main'] .= $this->printLoginItem();
 		$nav['sub'] = '<div id="navSub" class="nav">' . _NL;
 		foreach ($this->mainNavigation as $navItem) {
@@ -143,12 +144,12 @@ class sitePage {
 			<head>
 				<meta name="viewport" content="width=device-width, initial-scale=1">
 				<title>' . $this->title . '</title>
-				<link rel="stylesheet" type="text/css" href="style.css?' . mt_rand(5, 15). mt_rand(5, 15). mt_rand(5, 15). mt_rand(5, 15) . '" />';
+				<link rel="stylesheet" type="text/css" href="/style.css?' . mt_rand(5, 15). mt_rand(5, 15). mt_rand(5, 15). mt_rand(5, 15) . '" />';
 
 		foreach ($this->preloadImages as $img) {
 			$output .= '<link rel="preload" as="image" href="' . $img . '">';
 		}
-		$output .= '	<script type="text/javascript" src="sitetemplate.js?' . mt_rand(5, 15). mt_rand(5, 15). mt_rand(5, 15). mt_rand(5, 15) . '"></script>
+		$output .= '	<script type="text/javascript" src="/sitetemplate.js?' . mt_rand(5, 15). mt_rand(5, 15). mt_rand(5, 15). mt_rand(5, 15) . '"></script>
 				' . $this->script . '
 			</head>
 			<body id="body" tabindex="-5">
@@ -167,7 +168,15 @@ class sitePage {
 					case 'pageTable': case 'pageForm': case 'infoTip':
 						$this->page .= $content->output($this->preloadImages);
 						break;
-
+					case 'pageMarkdown':
+						$this->page .= '<div id="mdContainer"><div id="mdContent">';
+						foreach ($content->content as $block) {
+							$this->page .= $block->output();
+						}
+						$this->page .= '</div><div id="mdSidebar"><div>';
+						$this->page .= $content->sidebar();
+						$this->page .= '</div></div></div>';
+						break;
 					default:
 						$this->page .= '!!!Unable to handle content, type ' . get_class($content);
 						break;
@@ -252,10 +261,10 @@ class infoTip {
 		$this->type = $type;
 	}
 
-	function output(&$preloadImages) {
+	function output(&$preloadImages, $id = '', $hidden = '0') {
 		$img = '/images/Status' . ucfirst($this->type) . '.png';
 		$preloadImages[$img] = $img;
-		return '<div class="infotip' . ($this->type == 'warning' || $this->type == 'error' || $this->type == 'info' ? ' ' . $this->type : '') . '"><span>' . $this->text . '</span></div>' . _NL;
+		return '<div ' . ($hidden ? 'style="display: none;" ' : '') . ($id ? 'id="' . $id . '" ' : '') . 'class="infotip' . ($this->type == 'warning' || $this->type == 'error' || $this->type == 'info' ? ' ' . $this->type : '') . '"><span>' . $this->text . '</span></div>' . _NL;
 	}
 }
 

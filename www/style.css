@@ -1,4 +1,7 @@
 html {
+	--mdCodeBackground: #e6e6e6;
+
+
 	--BorderGrey: #e6e6e6;
 	--BackgroundWhite: #ffffff;
 	--TextWhite: #ffffff;
@@ -15,6 +18,7 @@ html {
 	--InputToggleOffBackground: #ffffff;
 	--InputToggleOn:#3f67a6;
 	--InputToggleOnBackground: #c8d5ea;
+	--InputListSelectedBackground: #bfbfbf;
 	--ButtonNoFocus: #6b8ec7;
 	--DisabledButton: #a8a8a8;
 	--InputBackground: #ffffff;
@@ -42,6 +46,8 @@ html {
 }
 @media (prefers-color-scheme: dark) {
 	html {
+		--mdCodeBackground: #868686;
+
 		--BorderGrey: #e6e6e6;
 		--BackgroundWhite: #333333;
 		--TextWhite: #ffffff;
@@ -58,6 +64,7 @@ html {
 		--InputToggleOffBackground: #666666;
 		--InputToggleOn:#3f67a6;
 		--InputToggleOnBackground: #c8d5ea;
+		--InputListSelectedBackground: #bfbfbf;
 		--ButtonNoFocus: #6b8ec7;
 		--DisabledButton: #a8a8a8;
 		--InputBackground: #666666;
@@ -103,6 +110,10 @@ html, body {
 
 a {
 	color: var(--LinkBlue);
+	text-decoration: none;
+}
+a:hover {
+	text-decoration: underline;
 }
 
 div#ajaxError, div#fatalError {
@@ -185,8 +196,6 @@ div#flyout > div#flyoutFrame.loading {
 	0% { transform: rotate(0deg); }
 	100% { transform: rotate(360deg); }
 }
-
-
 
 
 
@@ -306,7 +315,7 @@ label.list {
 	margin: -5px;
 }
 input:checked + label.list {
-	background-color: var(--TableHighlight);
+	background-color: var(--InputListSelectedBackground);
 }
 
 label.toggle {
@@ -597,6 +606,11 @@ div.dropdown li:hover {
 #mainContainer {
 	height: calc(100% - 90px);
 	position: relative;
+
+}
+#mainContainer img {
+	height: auto;
+	max-width: 100%;
 }
 #navSide {
 	width: 250px;
@@ -819,4 +833,79 @@ div.infotip.error {
 	border: 1px solid var(--InfoTipErrorBorder);
 	background-color: var(--InfoTipErrorBackground);
 	background-image: url('/images/StatusError.png');
+}
+
+
+h1, h2 {
+	font-weight: 300;
+}
+div#mdContainer {
+	display: flex;
+}
+div#mdContent {
+	display: inline-block;
+	padding: 5px 15px;
+	max-width: 80%;
+	font-size: initial !important;
+	word-break: break-word;
+	line-height: 170%;
+	flex: 80%;
+
+}
+div#mdSidebar {
+	display: inline-block;
+	float: right;
+	min-width: 300px !important;
+	padding: 10px;
+	flex: 20%;
+}
+@media only screen and (max-width: 600px) {
+	div#mdContent {
+		max-width: 100%;
+		flex: 100%;
+	}
+	div#mdSidebar {
+		display: none;
+	}
+}
+
+
+div#mdSidebar > div {
+	position: fixed;
+}
+div#mdSidebar ul {
+	list-style-type: none;
+	padding: 5px;
+}
+div#mdSidebar ul li {
+	padding: 5px;
+}
+
+
+div#mdContent figure img {
+	margin: auto;
+	display: flex;
+}
+div#mdContent figure.centre {
+	margin-left: auto;
+	margin-right: auto;
+}
+div#mdContent figure.right {
+	float: right;
+}
+div#mdContent figure.left {
+	float: left;
+}
+div#mdContent figcaption {
+	font-style: italic;
+	font-size: 13px;
+	line-height: initial;
+	text-align: center;
+	padding-top: 10px;
+}
+div#mdContent pre {
+	background-color: var(--mdCodeBackground);
+	overflow: auto;
+	padding: 2px 10px;
+
 }

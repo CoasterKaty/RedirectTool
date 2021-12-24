@@ -82,8 +82,6 @@ function submitForm(formID) {
 	var formMethod = elForm.getAttribute('data-method');
 	var formURL = elForm.getAttribute('action');
 
-	if (!validateForm(formID)) return false;
-
 	var elInputs = elForm.getElementsByTagName('input');
 	var elSubmit;
 	for (i = 0; i < elInputs.length; i++) {
@@ -92,6 +90,15 @@ function submitForm(formID) {
 			break;
 		}
 	}
+
+
+	if (validateForm(formID, elSubmit)) {
+		console.log('validateForm returned true');
+	} else {
+		console.log('validateForm returned false');
+		return false;
+	}
+	console.log('Continuing submitForm');
 
 	if (elSubmit) elSubmit.disabled = true;
 
@@ -116,15 +123,57 @@ function submitForm(formID) {
 	}
 }
 
-function validateForm(formID) {
-	/*
-		We need to somehow get validation rules through the page builder and into each form field element
-		and then run through them here.
+function validateForm(formID, elSubmit) {
+console.log('validateForm called');
+	var elForm = document.getElementById(formID);
+	var formValidate = elForm.getAttribute('data-validate');
+	var validateCheck = elForm.getAttribute('data-validate-process');
+	switch (validateCheck) {
+		case '0':
+			//Not started yet.
+			if (elSubmit) elSubmit.disabled = true;
+			var formData = new FormData(elForm);
+			var xhr = new XMLHttpRequest();
+			xhr.open('POST', formValidate, true);
+			xhr.onreadystatechange = function() {
+				if (xhr.readyState == 4 && xhr.status == 200) {
+					clearUnsavedFlyout();
+					document.getElementById(formID).setAttribute('data-validate-process', '2');
+					document.getElementById(formID).setAttribute('data-validate-result', xhr.response.replace(/^\s*/,'').replace(/\s*$/,''));
+					if (submitForm(formID)) document.getElementById(formID).submit();
+				}
+			};
+			xhr.send(formData);
+			console.log('validateForm sent XHR request');
 
-	*/
+			return false;
+		case '1':
+			console.log('validateForm waiting for XHR');
 
-	clearUnsavedFlyout();
-	return true;
+			//Still running
+			return false;
+		case '2':
+			// Validation completed
+			console.log('validateForm XHR completed');
+			if (elSubmit) elSubmit.disabled = false;
+
+			var validateResult = document.getElementById(formID).getAttribute('data-validate-result');
+			if (validateResult == '1') {
+				console.log('validated OK');
+
+				return true;
+			} else {
+				console.log('Not validated OK' + validateResult);
+				document.getElementById('error' + formID).style.display = 'block';
+				document.getElementById('error' + formID).innerHTML = '<span>' + validateResult + '</span>';
+				document.getElementById(formID).setAttribute('data-validate-process', '0');
+				return false;
+			}
+		default:
+			//Completed with error
+			return false;
+	}
+	return false;
 }
 // When an element is selected from the dropdown field
 function dropdownSelected(dropdownID, itemID) {

@@ -12,6 +12,8 @@ class pageForm {
 	public $fields;
 	public $method = 'post';		//post or ajax. post acts as a normal form, reloading the entire page. ajax handles it in ajax with no page reload.
 	public $id;
+	public $validate;
+
 	function __construct($name, $action) {
 		$this->name = $name;
 		$this->action = $action;
@@ -24,8 +26,9 @@ class pageForm {
 	}
 
 	function output(&$preloadImages) {
-		$output = '<form action="' . $this->action . '" name="' . $this->name . '" method="POST" onsubmit="return submitForm(\'' . $this->id . '\');" data-method="' . $this->method . '" id="' . $this->id . '">' . _NL;
+		$output = '<form action="' . $this->action . '" name="' . $this->name . '" method="POST" onsubmit="return submitForm(\'' . $this->id . '\');" data-method="' . $this->method . '" data-validate="' . $this->validate . '" data-validate-process="0" data-validate-result="" id="' . $this->id . '">' . _NL;
 		$output .= '<input type="hidden" name="httpReferer" value="' . urlencode($_SERVER['HTTP_REFERER']) . '">';
+		$output .= (new infoTip('', 'error'))->output($preloadImages, 'error' . $this->id, '1');
 		foreach ($this->fields as $field) {
 			$output .= $field->output($preloadImages);
 		}
@@ -51,6 +54,7 @@ class pageFormField {
 	public $maxLength;	//maxlength textarea
 	public $disabled;
 	public $help;		//help text
+
 
 	function __construct($name, $type) {
 		$this->name = $name;

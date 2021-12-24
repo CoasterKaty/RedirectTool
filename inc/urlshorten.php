@@ -56,11 +56,12 @@ class urlShorten extends baseClass {
 	function hitUrl($linkID) {
 		$this->modDB->QuerySingle('UPDATE tblUrls SET intHits = intHits + 1 WHERE intLinkID = \'' .  $this->modDB->Escape($linkID) . '\'');
 	}
-	function createUrl($args, $creator) {
+	function createUrl($args) {
 		if ($this->getUrl($args['slug'], '', $args['domainID'])) {
-			die('Error, already exists');
+			return 'This short link already exists';
 		}
-		$this->modDB->Insert('tblUrls', array('txtUrl' => $args['url'], 'txtSlug' => $args['slug'], 'intDomainID' => $args['domainID'], 'intHits' => 0, 'txtCreator' => $creator));
+		$this->modDB->Insert('tblUrls', array('txtUrl' => $args['url'], 'txtSlug' => $args['slug'], 'intDomainID' => $args['domainID'], 'intHits' => 0, 'txtCreator' => $this->modAuth->userName));
+		return 1;
 	}
 	function deleteUrl($linkID) {
 		if ($url = $this->modDB->QuerySingle('SELECT * FROM tblUrls WHERE intLinkID=\'' . $this->modDB->Escape($linkID) . '\'')) {

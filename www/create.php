@@ -5,6 +5,7 @@ require_once '../inc/graph.php';
 
 $pageAction = ($_GET['action'] ? $_GET['action'] : 'list');
 $pageSubmitted = $_GET['submitted'];
+$pageValidate = $_GET['validate'];
 $pageNumber = ($_GET['page'] ? $_GET['page'] : 1);
 
 include '../inc/urlshorten.php';
@@ -89,7 +90,19 @@ if ($modAuth->checkUserRole('Role.Admin') || $modAuth->checkUserRole('Role.User'
 					exit;
 				}
 			}
+			if ($pageValidate) {
+				//check if URL exists
+
+		                if ($urlShorten->getUrl($_POST['slug'], '', $_POST['domain'])) {
+		                        echo 'This short link already exists';
+					exit;
+        		        }
+
+				echo '1';
+				exit;
+			}
 			$createForm = new pageForm('addLink', 'create.php?action=addLink&submitted=1');
+			$createForm->validate = 'create.php?action=addLink&validate=1';
 			$domainField = $createForm->addField(new pageFormField('domain', 'dropdown'));
 			$domainField->placeholder = 'Select domain';
 			$domainField->label = 'Domain';
