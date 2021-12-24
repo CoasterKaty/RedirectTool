@@ -199,10 +199,6 @@ if ($modAuth->checkUserRole('Role.Admin') || $modAuth->checkUserRole('Role.User'
 			$sideNav = new navigationItem('', 'side');
 			$pageDomain = ($_GET['domain'] == 'ALL' ? '' : $_GET['domain']);
 			$pageCount =  $urlShorten->getPageCount($urlShorten->settings['listItems'], $pageDomain);
-			if ($pageCount == 0) {
-				header('Location: create.php?action=domains');
-				exit;
-			}
 			if ($pageCount < $pageNumber) $pageNumber = $pageCount;
 
 			$domains = $urlShorten->getDomains(1, 100);
@@ -211,15 +207,26 @@ if ($modAuth->checkUserRole('Role.Admin') || $modAuth->checkUserRole('Role.User'
 				$domainOptions[$domain['intDomainID']] = $domain['txtDomain'];
 			}
 
+			if ($pageCount == 0) {
+				if (count($domains) < 1) {
+					$thisPage->addContent(new infoTip('You must add at least one domain before creating short links.', 'error'));
+				} else {
+					$thisPage->addContent(new infoTip('There are no links configured.', 'warning'));
+				}
+			}
+
+
 			$domainDropdown = $sideNav->addItem(new navigationItem('Select Domain', 'dropdown'));
 			$domainDropdown->options = $domainOptions;
 			$domainDropdown->action = 'create.php?domain=$VALUE&page=' . $pageNumber;
 			$domainDropdown->value = ($pageDomain ? $pageDomain : 'ALL');
 
-			$createButton = $sideNav->addItem(new navigationItem('New Link', 'side'));
-			$createButton->icon = 'new.png';
-			$createButton->flyoutAction = 'create.php?action=addLink&flyout=1&domain=' . ($pageDomain != 'ALL' ? $pageDomain : '');
-			$createButton->flyoutTitle = 'Create New Short Link';
+			if (count($domains) > 0) {
+				$createButton = $sideNav->addItem(new navigationItem('New Link', 'side'));
+				$createButton->icon = 'new.png';
+				$createButton->flyoutAction = 'create.php?action=addLink&flyout=1&domain=' . ($pageDomain != 'ALL' ? $pageDomain : '');
+				$createButton->flyoutTitle = 'Create New Short Link';
+			}
 			$thisPage->addNavigation($sideNav);
 
 
