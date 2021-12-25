@@ -7,6 +7,8 @@ $url = $urlShorten->getUrl($slug, $domain);
 $urlShorten->hitUrl($url['intLinkID']);
 if ($url) {
 	header('Location: ' . $url['txtUrl']);
+} else {
+	echo 'RedirectTool - no domains and no links exist';
 }
 
 include '../inc/footer.php';
